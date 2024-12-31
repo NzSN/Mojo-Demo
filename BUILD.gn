@@ -1,0 +1,23 @@
+import("//testing/test.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+mojom("mojom") {
+  sources = [ "pingable.mojom" ]
+}
+
+test("example_unittest") {
+  sources = [
+    "pingable.cc",
+    "pingable.h",
+    "pingable_unittest.cc",
+  ]
+  deps = [
+    "//base",
+    "//testing/gtest", 
+    "//testing/gmock",
+    "//base/test:test_support",
+    "//base/test:test_config",
+    "//mojo/public/cpp/bindings:bindings",
+    "//mojo/core/embedder",
+    ":mojom",
+  ]  
+}

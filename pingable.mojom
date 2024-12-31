@@ -1,0 +1,7 @@
+// src/example/public/mojom/pingable.mojom
+module example.mojom;
+
+interface Pingable {
+  // Receives a "Ping" and responds with a random integer.
+  Ping() => (int32 random);
+};
