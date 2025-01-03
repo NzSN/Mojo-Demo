@@ -4,6 +4,7 @@
 namespace EXAMPLE_LOCAL {
 	class PingableImpl : example::mojom::Pingable {
 	public:
+		explicit PingableImpl(mojo::PendingReceiver<example::mojom::Pingable> receiver);
 		explicit PingableImpl(
 			mojo::PendingReceiver<example::mojom::Pingable> receiver, 
 			scoped_refptr<base::SequencedTaskRunner> task_runner);
