@@ -22,29 +22,30 @@
 
 #define MOJO_INITIALIZE		\
 	mojo::core::Init();		\
-	base::Thread ipc_thread("ipc!"); \
-	ipc_thread.StartWithOptions( \
+	base::Thread __ipc_thread("ipc!"); \
+	__ipc_thread.StartWithOptions( \
 		base::Thread::Options(base::MessagePumpType::IO, 0)); \
 	mojo::core::ScopedIPCSupport ipc_support( \
-		ipc_thread.task_runner(), \
+		__ipc_thread.task_runner(), \
 		mojo::core::ScopedIPCSupport::ShutdownPolicy::CLEAN);
-#define THREAD_INITIALIZE \
+#define THREAD_INITIALIZE {\
 	base::ThreadPoolInstance::Create("Default"); \
 	auto param = base::ThreadPoolInstance::InitParams(10); \
-	base::ThreadPoolInstance::Get()->Start(param);
+	base::ThreadPoolInstance::Get()->Start(param); \
+}
 
 #define MAINTHREAD_SETUP \
-	base::sequence_manager::SequenceManager::PrioritySettings priSettings(10, 0); \
-	auto settings = base::sequence_manager::SequenceManager::Settings::Builder() \
+	base::sequence_manager::SequenceManager::PrioritySettings __priSettings(10, 0); \
+	auto __settings = base::sequence_manager::SequenceManager::Settings::Builder() \
 						  .SetMessagePumpType(base::MessagePumpType::DEFAULT) \
 						  .SetRandomisedSamplingEnabled(true) \
 						  .SetAddQueueTimeToTasks(true) \
-						  .SetPrioritySettings(std::move(priSettings)) \
+						  .SetPrioritySettings(std::move(__priSettings)) \
 						  .Build(); \
-	auto seq = CreateSequenceManagerOnCurrentThreadWithPump( \
-		base::MessagePump::Create(base::MessagePumpType::DEFAULT), std::move(settings)); \
-	auto q = seq->CreateTaskQueue(base::sequence_manager::TaskQueue::Spec{QueueName::DEFAULT_TQ}); \
-	seq->SetDefaultTaskRunner(q->task_runner());
+	auto __seqM = CreateSequenceManagerOnCurrentThreadWithPump( \
+		base::MessagePump::Create(base::MessagePumpType::DEFAULT), std::move(__settings)); \
+	auto __q = __seqM->CreateTaskQueue(base::sequence_manager::TaskQueue::Spec{QueueName::DEFAULT_TQ}); \
+	__seqM->SetDefaultTaskRunner(__q->task_runner());
 
 using QueueName = ::perfetto::protos::pbzero::SequenceManagerTask::QueueName;
 
@@ -62,6 +63,7 @@ void InitializedProcess() {
 void SingleProcess() {
 	MOJO_INITIALIZE;
 	MAINTHREAD_SETUP;
+
 	mojo::Remote<example::mojom::Pingable> pingable;
 	mojo::PendingReceiver<example::mojom::Pingable> receiver =
 		pingable.BindNewPipeAndPassReceiver();
