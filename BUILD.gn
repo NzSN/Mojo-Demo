@@ -1,23 +1,35 @@
-import("//testing/test.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 mojom("mojom") {
   sources = [ "pingable.mojom" ]
 }
 
-test("example_unittest") {
+executable("browser") {
   sources = [
     "pingable.cc",
     "pingable.h",
-    "pingable_unittest.cc",
+    "browser.cc",
+    "helper.h",
   ]
   deps = [
     "//base",
-    "//testing/gtest", 
-    "//testing/gmock",
-    "//base/test:test_support",
-    "//base/test:test_config",
     "//mojo/public/cpp/bindings:bindings",
     "//mojo/core/embedder",
     ":mojom",
   ]  
+}
+
+executable("renderer") {
+   sources = [
+    "pingable.cc",
+    "pingable.h",
+    "renderer.cc",
+    "helper.h",
+  ]
+  deps = [
+    "//base",
+    "//mojo/public/cpp/bindings:bindings",
+    "//mojo/core/embedder",
+    ":mojom",
+  ]  
+ 
 }
